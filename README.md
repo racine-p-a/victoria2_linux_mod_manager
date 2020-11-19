@@ -4,9 +4,10 @@
 
 ## Usage
 
-## TODO
+## TODOs
 
 Make the interface less ugly.
+Close all file openers.
 
 Make it configurable.
 - where to store the run file
