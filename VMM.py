@@ -1,18 +1,18 @@
 # -*- coding:Utf-8 -*-
 
-# Steps to make this mod manager working :
-# - launch the game once with this option « PROTON_DUMP_DEBUG_COMMANDS=1 %command% » --> can't add the command
-#                                                                                               option : must be made by
-#                                                                                               user
-# - detect and save somewhere the .run file created
-# - modify this log file by adding the mod option
-# - run the modified
 import subprocess
 from tkinter import *
-from tkinter.filedialog import askopenfilename
 from tkinter.ttk import *
 import os.path
 import stat
+
+
+def launch_steam():
+    subprocess.run('steam &', shell=True, check=True, executable='/bin/sh')
+
+
+def launch_victoria2():
+    subprocess.run('steam steam://rungameid/42960 &', shell=True, check=True, executable='/bin/sh')
 
 
 class InterfaceV2MM(object):
@@ -26,7 +26,7 @@ class InterfaceV2MM(object):
 
         #       STEAM LAUNCHER
         self.steam_launch_label = Label(steam_frame, text="First, launch steam.").grid(column=0, row=0, sticky='W')
-        self.steam_launcher_button = Button(steam_frame, text="Launch Steam", command=self.launch_steam, width=15) \
+        self.steam_launcher_button = Button(steam_frame, text="Launch Steam", command=launch_steam, width=15) \
             .grid(column=0, row=1, pady=(0, 0), sticky='W')
         #       ADD LAUNCH OPTION
         self.file_label = Label(
@@ -39,11 +39,11 @@ class InterfaceV2MM(object):
         #       CHECK PROTON VERSION
         self.proton_version_label = Label(
             steam_frame,
-            text="At the same place, check that you force the SteamPlay Compatibility and choose the version « PROTON 4.11-13 ».") \
-            .grid(column=0, row=4, sticky='W')
+            text="At the same place, check that you force the SteamPlay Compatibility and choose the version « PROTON "
+                 "4.11-13 ».").grid(column=0, row=4, sticky='W')
         #       LAUNCH VICTORIA 2 ONCE
         self.launch_victoria = Label(steam_frame, text="Launch Victoria 2.").grid(column=0, row=14, sticky='W')
-        self.steam_launcher_button = Button(steam_frame, text="Launch Victoria 2", command=self.launch_victoria2) \
+        self.steam_launcher_button = Button(steam_frame, text="Launch Victoria 2", command=launch_victoria2) \
             .grid(column=0, row=15, pady=(0, 0), sticky='W')
         #       COLLECT YOUR DATA
         self.grab_data = Label(steam_frame, text="Collect your game data").grid(column=0, row=16, sticky='W')
@@ -131,7 +131,7 @@ class InterfaceV2MM(object):
             for line in executable_content:
                 if line.startswith('cd "'):
                     return line[4:-2]
-        except:
+        except FileNotFoundError:
             return False
         return False
 
@@ -159,14 +159,10 @@ class InterfaceV2MM(object):
         file_source.close()
         file_destination.close()
 
-        # TODO :Update the mod listbox once the data are loaded
-        self.get_list_of_mods(os.path.expanduser("~") + '/.v2mm/run')
-
-    def launch_steam(self):
-        subprocess.run('steam &', shell=True, check=True, executable='/bin/sh')
-
-    def launch_victoria2(self):
-        subprocess.run('steam steam://rungameid/42960 &', shell=True, check=True, executable='/bin/sh')
+        # Update the mod listbox once the data are loaded.
+        self.mod_list.delete(0, END)
+        for mod in self.get_list_of_mods(os.path.expanduser("~") + '/.v2mm/run'):
+            self.mod_list.insert(END, mod)
 
 
 if __name__ == '__main__':
