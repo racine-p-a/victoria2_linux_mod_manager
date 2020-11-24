@@ -16,11 +16,12 @@ python3 VMM.py
 ```
 
 Now, just follow the steps explained in the upper half of the (ugly) interface.
-- launch steam
-- add a launch option to the game (`PROTON_DUMP_DEBUG_COMMANDS=1 %command%`)
+- launch steam.
+- add a launch option to the game (`PROTON_DUMP_DEBUG_COMMANDS=1 %command%`).
 - force the use of a specific Steam Play compatibility : `Proton 4.11-13`.
-- launch victoria 2
-- one you are on the game main menu, quit the game
+- in some cases, you might have to rename the executable `v2game.exe` to `victoria2.exe`.
+- launch victoria 2.
+- one you are on the game main menu, quit the game.
 - click on ___Save your data___ in the mod manager interface, this should detect all the mods you already have
 installed.
  
