@@ -21,62 +21,34 @@ class InterfaceV2MM(object):
         self.root = Tk()
         self.root.title('Victoria 2 Mod Manager (linux)')
 
-        # STEAM FRAME
-        steam_frame = LabelFrame(self.root, text="INSTALLATION")
-        steam_frame.grid(column=0, row=0)
+        # The interface is made up of two main frames. One containing two sub-frames and one for the leave button.
 
-        #       STEAM LAUNCHER
-        self.steam_launch_label = Label(steam_frame, text="First, launch steam.").grid(column=0, row=0, sticky='W')
-        self.steam_launcher_button = Button(steam_frame, text="Launch Steam", command=launch_steam, width=15) \
-            .grid(column=0, row=1, pady=(0, 0), sticky='W')
-        #       ADD LAUNCH OPTION
-        self.file_label = Label(
-            steam_frame,
-            text="Now add the text below as a launch option (you can remove it later).") \
-            .grid(column=0, row=4, sticky='W')
-        self.launch_option = Entry(steam_frame, width=10)
-        self.launch_option.grid(row=5, sticky='ew')
-        self.launch_option.insert(0, 'PROTON_DUMP_DEBUG_COMMANDS=1 %command%')
-        #       CHECK PROTON VERSION
-        self.proton_version_label = Label(
-            steam_frame,
-            text="At the same place, check that you force the SteamPlay Compatibility and choose the version « PROTON "
-                 "4.11-13 ».").grid(column=0, row=6, sticky='W')
-        #       LAUNCH VICTORIA 2 ONCE
-        self.launch_victoria = Label(steam_frame, text="Launch Victoria 2.").grid(column=0, row=14, sticky='W')
-        self.steam_launcher_button = Button(steam_frame, text="Launch Victoria 2", command=launch_victoria2) \
-            .grid(column=0, row=15, pady=(0, 0), sticky='W')
-        #       COLLECT YOUR DATA
-        self.grab_data = Label(steam_frame, text="Collect your game data").grid(column=0, row=16, sticky='W')
-        self.grab_data_button = Button(steam_frame, text="Save your data", command=self.grab_game_data) \
-            .grid(column=0, row=17, pady=(0, 0), sticky='W')
-        #       SWAP YOUR EXECUTABLES
-        self.steam_launch_label = Label(steam_frame, text="Then, modify the executable we want to use.").grid(column=0,
-                                                                                                              row=18,
-                                                                                                              sticky='W')
-        self.steam_launcher_button = Button(steam_frame, text="Swap the game executable", command=self.swap_executable).grid(column=0, row=19, pady=(0, 0), sticky='W')
+        # MAIN FRAME
+        self.main_frame = LabelFrame(self.root)
+        self.main_frame.grid(row=0, column=0)
+        # The main frame is composed ow two sub-frames. The left one for actions and buttons dans the right one for
+        # data shown in a table.
 
-        # GAME FRAME
-        mod_list_frame = LabelFrame(self.root, text="MOD LIST")
-        mod_list_frame.grid(column=0, row=1)
-        #       LIST OF MODS FOUNT
-        self.mod_list_label = Label(mod_list_frame, text="Mods fount in your steam files.").grid(column=0, row=1,
-                                                                                                 sticky='W')
-        self.mod_list = Listbox(mod_list_frame)
-        self.mod_list.grid(column=0, row=2, sticky='W')
-        for mod in self.get_list_of_mods(os.path.expanduser("~") + '/.v2mm/run'):
-            self.mod_list.insert(END, mod)
-        #       LAUNCH MOD BUTTON
-        Button(mod_list_frame, text='Launch selected mod', command=self.launch_game_with_selected_mod).grid(column=1,
-                                                                                                            row=2)
+        #   LEFT SUB-FRAME
+        self.left_sub_frame = Notebook(self.main_frame)
+        # The left sub_frame is made up of two tabs. One for installation and one for usage.
+        self.tab_installation = Frame(self.left_sub_frame)
+        self.left_sub_frame.add(self.tab_installation, text='Global results')
+        self.tab_usage = Frame(self.left_sub_frame)
+        self.left_sub_frame.add(self.tab_usage, text='Global results')
 
-        # LOGS OF THE MOD MANAGER
-        # TODO
+        self.left_sub_frame.grid(row=1, column=0)
 
-        # END BUTTONS FRAME
-        end_button_frame = LabelFrame(self.root)
-        end_button_frame.grid(column=0, row=2)
-        Button(end_button_frame, text='Leave', command=self.root.quit).grid(row=0, column=0)
+        #   RIGHT SUB-FRAME
+        self.right_sub_frame = Frame(self.main_frame)
+        self.left_sub_frame.grid(row=1, column=1)
+
+
+        # END BUTTON FRAME
+        self.end_button_frame = LabelFrame(self.root)
+        self.end_button_frame.grid(row=2, column=0)
+        Button(self.end_button_frame, text='Leave', command=self.root.quit).grid(row=0, column=0)
+
 
     def swap_executable(self):
         """
