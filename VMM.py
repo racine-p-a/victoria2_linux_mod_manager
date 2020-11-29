@@ -5,6 +5,7 @@ from tkinter import *
 from tkinter.ttk import *
 import os.path
 import stat
+from shutil import copyfile
 
 
 def launch_steam():
@@ -32,15 +33,15 @@ class InterfaceV2MM(object):
         self.file_label = Label(
             steam_frame,
             text="Now add the text below as a launch option (you can remove it later).") \
-            .grid(column=0, row=2, sticky='W')
+            .grid(column=0, row=4, sticky='W')
         self.launch_option = Entry(steam_frame, width=10)
-        self.launch_option.grid(row=3, sticky='ew')
+        self.launch_option.grid(row=5, sticky='ew')
         self.launch_option.insert(0, 'PROTON_DUMP_DEBUG_COMMANDS=1 %command%')
         #       CHECK PROTON VERSION
         self.proton_version_label = Label(
             steam_frame,
             text="At the same place, check that you force the SteamPlay Compatibility and choose the version « PROTON "
-                 "4.11-13 ».").grid(column=0, row=4, sticky='W')
+                 "4.11-13 ».").grid(column=0, row=6, sticky='W')
         #       LAUNCH VICTORIA 2 ONCE
         self.launch_victoria = Label(steam_frame, text="Launch Victoria 2.").grid(column=0, row=14, sticky='W')
         self.steam_launcher_button = Button(steam_frame, text="Launch Victoria 2", command=launch_victoria2) \
@@ -49,6 +50,11 @@ class InterfaceV2MM(object):
         self.grab_data = Label(steam_frame, text="Collect your game data").grid(column=0, row=16, sticky='W')
         self.grab_data_button = Button(steam_frame, text="Save your data", command=self.grab_game_data) \
             .grid(column=0, row=17, pady=(0, 0), sticky='W')
+        #       SWAP YOUR EXECUTABLES
+        self.steam_launch_label = Label(steam_frame, text="Then, modify the executable we want to use.").grid(column=0,
+                                                                                                              row=18,
+                                                                                                              sticky='W')
+        self.steam_launcher_button = Button(steam_frame, text="Swap the game executable", command=self.swap_executable).grid(column=0, row=19, pady=(0, 0), sticky='W')
 
         # GAME FRAME
         mod_list_frame = LabelFrame(self.root, text="MOD LIST")
@@ -71,6 +77,18 @@ class InterfaceV2MM(object):
         end_button_frame = LabelFrame(self.root)
         end_button_frame.grid(column=0, row=2)
         Button(end_button_frame, text='Leave', command=self.root.quit).grid(row=0, column=0)
+
+    def swap_executable(self):
+        """
+        We game usually uses victoria2.exe while we want it to use v2game.exe.
+        The solution is to :
+        - rename victoria2.exe to _victoria2.exe
+        - copy v2game.exe to victoria2.exe
+        :return:
+        """
+        game_folder = self.extract_game_directory_from_proton_runfile(os.path.expanduser("~") + '/.v2mm/run')
+        os.rename(game_folder + '/victoria2.exe', game_folder + '/_victoria2.exe')
+        copyfile(game_folder + '/v2game.exe', game_folder + '/victoria2.exe')
 
     def launch_game_with_selected_mod(self):
         """
@@ -110,7 +128,6 @@ class InterfaceV2MM(object):
         if not game_directory:  # If failure to load mods, send back empty list.
             return mod_list
 
-        print(game_directory)
         for item in os.listdir(game_directory + "/mod/"):
             if os.path.isfile(game_directory + "/mod/" + item):  # Is it a file ?
                 # And is its extension « .mod » ?
