@@ -8,10 +8,6 @@ import stat
 from shutil import copyfile
 
 
-def launch_steam():
-    subprocess.run('steam &', shell=True, check=True, executable='/bin/sh')
-
-
 def launch_victoria2():
     subprocess.run('steam steam://rungameid/42960 &', shell=True, check=True, executable='/bin/sh')
 
@@ -21,10 +17,11 @@ class InterfaceV2MM(object):
         self.root = Tk()
         self.root.title('Victoria 2 Mod Manager (linux)')
 
-        # The interface is made up of two main frames. One containing two sub-frames and one for the leave button.
+        # The interface is made up of three main frames. One containing two sub-frames, one for logs and one for the
+        # leave button.
 
         # MAIN FRAME
-        main_frame = LabelFrame(self.root)
+        main_frame = Frame(self.root)
         main_frame.grid(row=0, column=0)
         # The main frame is composed ow two sub-frames. The left one for actions and buttons dans the right one for
         # data shown in a table.
@@ -33,36 +30,113 @@ class InterfaceV2MM(object):
         left_sub_frame = Notebook(main_frame)
         # The left sub_frame is made up of two tabs. One for installation and one for usage.
         tab_installation = Frame(left_sub_frame)
-        left_sub_frame.add(tab_installation, text='Global results')
+        left_sub_frame.add(tab_installation, text='Installation')
+        #       STEAM LAUNCHER
+        steam_launch_label = Label(tab_installation, text="1° First, launch steam.")
+        steam_launch_label.grid(column=0, row=0, sticky='W')
+        steam_launcher_button = Button(
+            tab_installation,
+            text="Launch Steam",
+            command=self.launch_steam,
+            width=15
+        )
+        steam_launcher_button.grid(column=0, row=1, pady=(0, 0), sticky='W')
+        #       ADD LAUNCH OPTION
+        file_label = Label(
+            tab_installation,
+            text="2° Now add the text below as a launch option (you can remove it later).")
+        file_label.grid(column=0, row=2, sticky='W')
+        launch_option = Entry(tab_installation, width=10)
+        launch_option.grid(row=3, sticky='ew')
+        launch_option.insert(0, 'PROTON_DUMP_DEBUG_COMMANDS=1 %command%')
+        #       CHECK PROTON VERSION
+        proton_version_label = Label(
+            tab_installation,
+            text="3° At the same place, check that you force\nthe SteamPlay Compatibility and choose the version"
+                 " « PROTON 4.11-13 ».")
+        proton_version_label.grid(column=0, row=4, sticky='W')
+        #       LAUNCH VICTORIA 2 ONCE
+        launch_victoria = Label(tab_installation, text="4° Launch the game once.")
+        launch_victoria.grid(column=0, row=5, sticky='W')
+        steam_launcher_button = Button(tab_installation, text="Launch Victoria 2", command=launch_victoria2)
+        steam_launcher_button.grid(column=0, row=6, pady=(0, 0), sticky='W')
+        #       COLLECT YOUR DATA
+        grab_data = Label(tab_installation, text="5° Collect your game data")
+        grab_data.grid(column=0, row=7, sticky='W')
+        grab_data_button = Button(tab_installation, text="Save your data", command=self.grab_game_data)
+        grab_data_button.grid(column=0, row=8, pady=(0, 0), sticky='W')
+        #       SWAP YOUR EXECUTABLES
+        steam_launch_label = Label(
+            tab_installation,
+            text="6° Then, modify the executable we want to use."
+        )
+        steam_launch_label.grid(column=0, row=9, sticky='W')
+        steam_launcher_button = Button(
+            tab_installation,
+            text="Swap the game executable",
+            command=self.swap_executable)
+        steam_launcher_button.grid(column=0, row=10, pady=(0, 0), sticky='W')
+
         tab_usage = Frame(left_sub_frame)
-        left_sub_frame.add(tab_usage, text='Global results')
+        left_sub_frame.add(tab_usage, text='Usage')
+
+        # GAME FRAME
+        #       LIST OF MODS FOUNT
+        mod_list_label = Label(tab_usage, text="Mods fount in your steam files.")
+        mod_list_label.grid(column=0, row=1, sticky='W')
+        self.mod_list = Listbox(tab_usage)
+        self.mod_list.grid(column=0, row=2, sticky='W')
+        for mod in self.get_list_of_mods(os.path.expanduser("~") + '/.v2mm/run'):
+            self.mod_list.insert(END, mod)
+        #       LAUNCH MOD BUTTON
+        Button(tab_usage, text='Launch selected mod', command=self.launch_game_with_selected_mod).grid(column=1, row=2)
 
         left_sub_frame.grid(row=1, column=0)
+
 
         #   RIGHT SUB-FRAME
         right_sub_frame = Frame(main_frame)
         right_sub_frame.grid(row=1, column=1)
         letters_n_grams_result = Treeview(right_sub_frame, columns=(
-            "#0"
-            'Monogram',
-            'Monogram count',
-            'Bigram',
-            'Bigram count',
-            'Trigram',
-            'Trigram count',
+            '',
         ))
         letters_n_grams_result.grid(column=1, row=4)
 
 
+        # LOGS FRAME
+        self.log_frame = Text(self.root, height=10, width=100)
+        self.log_frame.grid(row=2, column=0)
+        self.log_frame.insert(END, "Logs :")
+
+
         # END BUTTON FRAME
-        end_button_frame = LabelFrame(self.root)
-        end_button_frame.grid(row=2, column=0)
+        end_button_frame = Frame(self.root)
+        end_button_frame.grid(row=3, column=0)
         Button(end_button_frame, text='Leave', command=self.root.quit).grid(row=0, column=0)
 
+        if self.is_game_already_installed():
+            left_sub_frame.select(tab_usage)
+
+
+    def is_game_already_installed(self):
+        # TODO
+        return False
+
+    def launch_steam(self):
+        """
+        Just launches steam in a sub process.
+        TODO : Find a way to get the command output and display it in the logs.
+        :return:
+        """
+        subprocess.run('steam &',
+                       shell=True,
+                       check=True,
+                       executable='/bin/sh'
+                       )
 
     def swap_executable(self):
         """
-        We game usually uses victoria2.exe while we want it to use v2game.exe.
+        Te game usually uses victoria2.exe while we want it to use v2game.exe.
         The solution is to :
         - rename victoria2.exe to _victoria2.exe
         - copy v2game.exe to victoria2.exe
