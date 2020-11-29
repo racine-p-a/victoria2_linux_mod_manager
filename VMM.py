@@ -41,7 +41,17 @@ class InterfaceV2MM(object):
 
         #   RIGHT SUB-FRAME
         self.right_sub_frame = Frame(self.main_frame)
-        self.left_sub_frame.grid(row=1, column=1)
+        self.right_sub_frame.grid(row=1, column=1)
+        self.letters_n_grams_result = Treeview(self.right_sub_frame, columns=(
+            "#0"
+            'Monogram',
+            'Monogram count',
+            'Bigram',
+            'Bigram count',
+            'Trigram',
+            'Trigram count',
+        ))
+        self.letters_n_grams_result.grid(column=1, row=4)
 
 
         # END BUTTON FRAME
