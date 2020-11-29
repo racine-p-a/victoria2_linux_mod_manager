@@ -31,6 +31,9 @@ class InterfaceV2MM(object):
         # The left sub_frame is made up of two tabs. One for installation and one for usage.
         tab_installation = Frame(left_sub_frame)
         left_sub_frame.add(tab_installation, text='Installation')
+        #       OPTIONS
+        # TODO PROPOSE TO CUSTOMIZE THE run_file location os.path.expanduser("~") + '/.v2mm/run'
+
         #       STEAM LAUNCHER
         steam_launch_label = Label(tab_installation, text="1° First, launch steam.")
         steam_launch_label.grid(column=0, row=0, sticky='W')
@@ -100,6 +103,7 @@ class InterfaceV2MM(object):
         letters_n_grams_result = Treeview(right_sub_frame, columns=(
             '',
         ))
+        # TODO Fill the table with as mush info we can get.
         letters_n_grams_result.grid(column=1, row=4)
 
 
@@ -143,8 +147,8 @@ class InterfaceV2MM(object):
         :return:
         """
         game_folder = self.extract_game_directory_from_proton_runfile(os.path.expanduser("~") + '/.v2mm/run')
-        os.rename(game_folder + '/victoria2.exe', game_folder + '/_victoria2.exe')
-        copyfile(game_folder + '/v2game.exe', game_folder + '/victoria2.exe')
+        os.rename(game_folder + '/victoria2.exe', game_folder + '/_victoria2.exe') # todo try and logs
+        copyfile(game_folder + '/v2game.exe', game_folder + '/victoria2.exe') # todo try and logs
 
     def launch_game_with_selected_mod(self):
         """
@@ -180,7 +184,7 @@ class InterfaceV2MM(object):
     def get_list_of_mods(self, runfile_location):
         mod_list = ['---']
         # We need to extract the game directory which is within the file. It is the line starting by « cd " ».
-        game_directory = self.extract_game_directory_from_proton_runfile(runfile_location)
+        game_directory = self.extract_game_directory_from_proton_runfile(runfile_location) # todo check
         if not game_directory:  # If failure to load mods, send back empty list.
             return mod_list
 
@@ -205,6 +209,7 @@ class InterfaceV2MM(object):
                 if line.startswith('cd "'):
                     return line[4:-2]
         except FileNotFoundError:
+            # todo logs
             return False
         return False
 
@@ -224,11 +229,12 @@ class InterfaceV2MM(object):
         # So, the file we want is...
         path_to_run_exe = '/tmp/proton_' + username + '/run'
         # We want to copy it somewhere. ~/v2mm/run might be a good place.
+        # todo check if path_to_run_exe exists -> logs
         file_source = open(path_to_run_exe, 'r')
-        if not os.path.exists(home_directory + '/.v2mm/'):  # Creates the directory if it does not exist.
+        if not os.path.exists(home_directory + '/.v2mm/'):  # Creates the directory if it does not exist. todo -> logs
             os.mkdir(home_directory + '/.v2mm/')
-        file_destination = open(home_directory + '/.v2mm/run', 'w')
-        file_destination.write(file_source.read())
+        file_destination = open(home_directory + '/.v2mm/run', 'w') # todo try and logs
+        file_destination.write(file_source.read()) # todo try and logs
         file_source.close()
         file_destination.close()
 
