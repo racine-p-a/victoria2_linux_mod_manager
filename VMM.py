@@ -24,25 +24,25 @@ class InterfaceV2MM(object):
         # The interface is made up of two main frames. One containing two sub-frames and one for the leave button.
 
         # MAIN FRAME
-        self.main_frame = LabelFrame(self.root)
-        self.main_frame.grid(row=0, column=0)
+        main_frame = LabelFrame(self.root)
+        main_frame.grid(row=0, column=0)
         # The main frame is composed ow two sub-frames. The left one for actions and buttons dans the right one for
         # data shown in a table.
 
         #   LEFT SUB-FRAME
-        self.left_sub_frame = Notebook(self.main_frame)
+        left_sub_frame = Notebook(main_frame)
         # The left sub_frame is made up of two tabs. One for installation and one for usage.
-        self.tab_installation = Frame(self.left_sub_frame)
-        self.left_sub_frame.add(self.tab_installation, text='Global results')
-        self.tab_usage = Frame(self.left_sub_frame)
-        self.left_sub_frame.add(self.tab_usage, text='Global results')
+        tab_installation = Frame(left_sub_frame)
+        left_sub_frame.add(tab_installation, text='Global results')
+        tab_usage = Frame(left_sub_frame)
+        left_sub_frame.add(tab_usage, text='Global results')
 
-        self.left_sub_frame.grid(row=1, column=0)
+        left_sub_frame.grid(row=1, column=0)
 
         #   RIGHT SUB-FRAME
-        self.right_sub_frame = Frame(self.main_frame)
-        self.right_sub_frame.grid(row=1, column=1)
-        self.letters_n_grams_result = Treeview(self.right_sub_frame, columns=(
+        right_sub_frame = Frame(main_frame)
+        right_sub_frame.grid(row=1, column=1)
+        letters_n_grams_result = Treeview(right_sub_frame, columns=(
             "#0"
             'Monogram',
             'Monogram count',
@@ -51,13 +51,13 @@ class InterfaceV2MM(object):
             'Trigram',
             'Trigram count',
         ))
-        self.letters_n_grams_result.grid(column=1, row=4)
+        letters_n_grams_result.grid(column=1, row=4)
 
 
         # END BUTTON FRAME
-        self.end_button_frame = LabelFrame(self.root)
-        self.end_button_frame.grid(row=2, column=0)
-        Button(self.end_button_frame, text='Leave', command=self.root.quit).grid(row=0, column=0)
+        end_button_frame = LabelFrame(self.root)
+        end_button_frame.grid(row=2, column=0)
+        Button(end_button_frame, text='Leave', command=self.root.quit).grid(row=0, column=0)
 
 
     def swap_executable(self):
