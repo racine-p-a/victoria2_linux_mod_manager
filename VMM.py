@@ -96,15 +96,14 @@ class InterfaceV2MM(object):
 
         left_sub_frame.grid(row=1, column=0)
 
-
         #   RIGHT SUB-FRAME
         right_sub_frame = Frame(main_frame)
         right_sub_frame.grid(row=1, column=1)
-        letters_n_grams_result = Treeview(right_sub_frame, columns=(
+        data = Treeview(right_sub_frame, columns=(
             '',
         ))
-        # TODO Fill the table with as mush info we can get.
-        letters_n_grams_result.grid(column=1, row=4)
+        # TODO Fill the table with as much info we can get.
+        data.grid(column=1, row=4)
 
 
         # LOGS FRAME
@@ -147,8 +146,8 @@ class InterfaceV2MM(object):
         :return:
         """
         game_folder = self.extract_game_directory_from_proton_runfile(os.path.expanduser("~") + '/.v2mm/run')
-        os.rename(game_folder + '/victoria2.exe', game_folder + '/_victoria2.exe') # todo try and logs
-        copyfile(game_folder + '/v2game.exe', game_folder + '/victoria2.exe') # todo try and logs
+        os.rename(game_folder + '/victoria2.exe', game_folder + '/_victoria2.exe')  # todo try and logs
+        copyfile(game_folder + '/v2game.exe', game_folder + '/victoria2.exe')  # todo try and logs
 
     def launch_game_with_selected_mod(self):
         """
