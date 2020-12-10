@@ -129,7 +129,14 @@ class InterfaceV2MM(object):
 
 
     def is_game_already_installed(self):
-        # TODO
+        """
+        How do we check if the mod manager has already been installed ? Well, we just check if some files are already
+        present in the manager directory.
+        :return:
+        """
+        if os.path.exists(self.manager_data_directory):
+            if os.path.exists(self.manager_data_directory + 'mod_launcher'):
+                return True
         return False
 
     def launch_steam(self):
