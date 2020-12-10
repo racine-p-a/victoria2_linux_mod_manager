@@ -105,7 +105,14 @@ class InterfaceV2MM(object):
         data.column("Data", minwidth=150)
         data.column("Value", minwidth=800)
         data.insert('', '1', values=('V2MM directory', self.manager_data_directory))
-        data.insert('', '1', values=('Game directory', self.extract_game_directory_from_proton_runfile(self.manager_data_directory + 'run')))
+        data.insert(
+            '',
+            '1',
+            values=(
+                'Game directory',
+                self.extract_game_directory_from_proton_runfile(self.manager_data_directory + 'run')
+            )
+        )
         data.grid(column=1, row=4)
 
         # LOGS FRAME
@@ -121,22 +128,20 @@ class InterfaceV2MM(object):
         if self.is_game_already_installed():
             left_sub_frame.select(tab_usage)
 
-    def get_game_directory(self):
-        return ''
-
-
     def is_game_already_installed(self):
         """
         How do we check if the mod manager has already been installed ? Well, we just check if some files are already
         present in the manager directory.
         :return:
         """
+        # todo put in logs if directory manager has been found
         if os.path.exists(self.manager_data_directory):
             if os.path.exists(self.manager_data_directory + 'mod_launcher'):
                 return True
         return False
 
-    def launch_steam(self):
+    @staticmethod
+    def launch_steam():
         """
         Just launches steam in a sub process.
         TODO : Find a way to get the command output and display it in the logs.
@@ -158,8 +163,9 @@ class InterfaceV2MM(object):
         """
         game_folder = self.extract_game_directory_from_proton_runfile(self.manager_data_directory + 'run')
         try:
-            os.rename(game_folder + '/victoria2.exe111', game_folder + '/_victoria2.exe111')
-            copyfile(game_folder + '/v2game.exe111', game_folder + '/victoria2.exe111')
+            os.rename(game_folder + '/victoria2.exe', game_folder + '/_victoria2.exe')
+            copyfile(game_folder + '/v2game.exe', game_folder + '/victoria2.exe')
+            # todo change the selected tab to "usage"
         except Exception as e:
             self.add_new_logs(e.__str__())
 
@@ -169,7 +175,7 @@ class InterfaceV2MM(object):
         beginning).
         """
         final_logs = "Logs :\n"
-        final_logs += new_logs + "\n"
+        final_logs += new_logs.__str__() + "\n"
 
         precedent_logs = self.log_frame.get('1.0', END)
         log_lines = precedent_logs.split("\n")
@@ -187,6 +193,7 @@ class InterfaceV2MM(object):
         3° execute this new file within a sub-shell
         :return:
         """
+        # todo logs
         # Getting the original content.
         source_file_opener = open(self.manager_data_directory + 'run', 'r')
         executable_content = source_file_opener.readlines()
@@ -213,7 +220,7 @@ class InterfaceV2MM(object):
     def get_list_of_mods(self, runfile_location):
         mod_list = ['---']
         # We need to extract the game directory which is within the file. It is the line starting by « cd " ».
-        game_directory = self.extract_game_directory_from_proton_runfile(runfile_location) # todo check
+        game_directory = self.extract_game_directory_from_proton_runfile(runfile_location) # todo checks and logs
         if not game_directory:  # If failure to load mods, send back empty list.
             return mod_list
 
@@ -252,6 +259,7 @@ class InterfaceV2MM(object):
         # The common location is /tmp/proton_UNIX-USERNAME .
         # One log file is enough for the mod manager : /tmp/proton_UNIX-USERNAME/run
 
+        # todo MOAAAAAAAAAR LOGS !
         # Get the file location
         home_directory = os.path.expanduser("~")
         username = os.path.basename(home_directory)
