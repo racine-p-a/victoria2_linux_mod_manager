@@ -11,7 +11,7 @@ Issues/bug reports are welcome.
 
 Just download/clone the python file and place it on your computer wherever you want and then launch it.
 
-```python
+```bash
 python3 VMM.py
 ```
 
