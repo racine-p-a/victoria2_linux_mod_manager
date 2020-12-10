@@ -108,13 +108,10 @@ class InterfaceV2MM(object):
         data.insert('', '1', values=('Game directory', self.extract_game_directory_from_proton_runfile(self.manager_data_directory + 'run')))
         data.grid(column=1, row=4)
 
-
-
         # LOGS FRAME
         self.log_frame = Text(self.root, height=10, width=100)
         self.log_frame.grid(row=2, column=0)
-        self.log_frame.insert(END, "Logs :")
-
+        self.log_frame.insert(END, "Logs :")
 
         # END BUTTON FRAME
         end_button_frame = Frame(self.root)
@@ -160,8 +157,27 @@ class InterfaceV2MM(object):
         :return:
         """
         game_folder = self.extract_game_directory_from_proton_runfile(self.manager_data_directory + 'run')
-        os.rename(game_folder + '/victoria2.exe', game_folder + '/_victoria2.exe')  # todo try and logs
-        copyfile(game_folder + '/v2game.exe', game_folder + '/victoria2.exe')  # todo try and logs
+        try:
+            os.rename(game_folder + '/victoria2.exe111', game_folder + '/_victoria2.exe111')
+            copyfile(game_folder + '/v2game.exe111', game_folder + '/victoria2.exe111')
+        except Exception as e:
+            self.add_new_logs(e.__str__())
+
+    def add_new_logs(self, new_logs=''):
+        """
+        Adding new logs means geting the current displayed logs and place the new logs on top of them (at the
+        beginning).
+        """
+        final_logs = "Logs :\n"
+        final_logs += new_logs + "\n"
+
+        precedent_logs = self.log_frame.get('1.0', END)
+        log_lines = precedent_logs.split("\n")
+        for line in log_lines:
+            if line != 'Logs :' and line != '':
+                final_logs += line + "\n"
+        self.log_frame.delete('1.0', END)
+        self.log_frame.insert(END, final_logs)
 
     def launch_game_with_selected_mod(self):
         """
