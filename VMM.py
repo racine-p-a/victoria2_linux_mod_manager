@@ -16,6 +16,7 @@ class InterfaceV2MM(object):
     def __init__(self):
         self.root = Tk()
         self.root.title('Victoria 2 Mod Manager (linux)')
+        self.manager_data_directory = os.path.expanduser("~") + '/.v2mm/'
 
         # The interface is made up of three main frames. One containing two sub-frames, one for logs and one for the
         # leave button.
@@ -31,54 +32,52 @@ class InterfaceV2MM(object):
         # The left sub_frame is made up of two tabs. One for installation and one for usage.
         tab_installation = Frame(left_sub_frame)
         left_sub_frame.add(tab_installation, text='Installation')
-        #       OPTIONS
-        # TODO PROPOSE TO CUSTOMIZE THE run_file location os.path.expanduser("~") + '/.v2mm/run'
 
         #       STEAM LAUNCHER
         steam_launch_label = Label(tab_installation, text="1° First, launch steam.")
-        steam_launch_label.grid(column=0, row=0, sticky='W')
+        steam_launch_label.grid(column=0, row=2, sticky='W')
         steam_launcher_button = Button(
             tab_installation,
             text="Launch Steam",
             command=self.launch_steam,
             width=15
         )
-        steam_launcher_button.grid(column=0, row=1, pady=(0, 0), sticky='W')
+        steam_launcher_button.grid(column=0, row=3, pady=(0, 0), sticky='W')
         #       ADD LAUNCH OPTION
         file_label = Label(
             tab_installation,
             text="2° Now add the text below as a launch option (you can remove it later).")
-        file_label.grid(column=0, row=2, sticky='W')
+        file_label.grid(column=0, row=4, sticky='W')
         launch_option = Entry(tab_installation, width=10)
-        launch_option.grid(row=3, sticky='ew')
+        launch_option.grid(row=5, sticky='ew')
         launch_option.insert(0, 'PROTON_DUMP_DEBUG_COMMANDS=1 %command%')
         #       CHECK PROTON VERSION
         proton_version_label = Label(
             tab_installation,
             text="3° At the same place, check that you force\nthe SteamPlay Compatibility and choose the version"
                  " « PROTON 4.11-13 ».")
-        proton_version_label.grid(column=0, row=4, sticky='W')
+        proton_version_label.grid(column=0, row=6, sticky='W')
         #       LAUNCH VICTORIA 2 ONCE
         launch_victoria = Label(tab_installation, text="4° Launch the game once.")
-        launch_victoria.grid(column=0, row=5, sticky='W')
+        launch_victoria.grid(column=0, row=7, sticky='W')
         steam_launcher_button = Button(tab_installation, text="Launch Victoria 2", command=launch_victoria2)
-        steam_launcher_button.grid(column=0, row=6, pady=(0, 0), sticky='W')
+        steam_launcher_button.grid(column=0, row=8, pady=(0, 0), sticky='W')
         #       COLLECT YOUR DATA
         grab_data = Label(tab_installation, text="5° Collect your game data")
-        grab_data.grid(column=0, row=7, sticky='W')
+        grab_data.grid(column=0, row=9, sticky='W')
         grab_data_button = Button(tab_installation, text="Save your data", command=self.grab_game_data)
-        grab_data_button.grid(column=0, row=8, pady=(0, 0), sticky='W')
+        grab_data_button.grid(column=0, row=10, pady=(0, 0), sticky='W')
         #       SWAP YOUR EXECUTABLES
         steam_launch_label = Label(
             tab_installation,
             text="6° Then, modify the executable we want to use."
         )
-        steam_launch_label.grid(column=0, row=9, sticky='W')
+        steam_launch_label.grid(column=0, row=11, sticky='W')
         steam_launcher_button = Button(
             tab_installation,
             text="Swap the game executable",
             command=self.swap_executable)
-        steam_launcher_button.grid(column=0, row=10, pady=(0, 0), sticky='W')
+        steam_launcher_button.grid(column=0, row=12, pady=(0, 0), sticky='W')
 
         tab_usage = Frame(left_sub_frame)
         left_sub_frame.add(tab_usage, text='Usage')
@@ -89,7 +88,7 @@ class InterfaceV2MM(object):
         mod_list_label.grid(column=0, row=1, sticky='W')
         self.mod_list = Listbox(tab_usage)
         self.mod_list.grid(column=0, row=2, sticky='W')
-        for mod in self.get_list_of_mods(os.path.expanduser("~") + '/.v2mm/run'):
+        for mod in self.get_list_of_mods(self.manager_data_directory + 'run'):
             self.mod_list.insert(END, mod)
         #       LAUNCH MOD BUTTON
         Button(tab_usage, text='Launch selected mod', command=self.launch_game_with_selected_mod).grid(column=1, row=2)
@@ -99,11 +98,16 @@ class InterfaceV2MM(object):
         #   RIGHT SUB-FRAME
         right_sub_frame = Frame(main_frame)
         right_sub_frame.grid(row=1, column=1)
-        data = Treeview(right_sub_frame, columns=(
-            '',
-        ))
-        # TODO Fill the table with as much info we can get.
+        data = Treeview(right_sub_frame, columns=2, show=["headings"])
+        data['columns'] = ('Data', 'Value')
+        data.heading('#1', text='Data')
+        data.heading('#2', text='Value')
+        data.column("Data", minwidth=150)
+        data.column("Value", minwidth=800)
+        data.insert('', '1', values=('V2MM directory', self.manager_data_directory))
+        data.insert('', '1', values=('Game directory', self.extract_game_directory_from_proton_runfile(self.manager_data_directory + 'run')))
         data.grid(column=1, row=4)
+
 
 
         # LOGS FRAME
@@ -119,6 +123,9 @@ class InterfaceV2MM(object):
 
         if self.is_game_already_installed():
             left_sub_frame.select(tab_usage)
+
+    def get_game_directory(self):
+        return ''
 
 
     def is_game_already_installed(self):
@@ -145,7 +152,7 @@ class InterfaceV2MM(object):
         - copy v2game.exe to victoria2.exe
         :return:
         """
-        game_folder = self.extract_game_directory_from_proton_runfile(os.path.expanduser("~") + '/.v2mm/run')
+        game_folder = self.extract_game_directory_from_proton_runfile(self.manager_data_directory + 'run')
         os.rename(game_folder + '/victoria2.exe', game_folder + '/_victoria2.exe')  # todo try and logs
         copyfile(game_folder + '/v2game.exe', game_folder + '/victoria2.exe')  # todo try and logs
 
@@ -158,7 +165,7 @@ class InterfaceV2MM(object):
         :return:
         """
         # Getting the original content.
-        source_file_opener = open(os.path.expanduser("~") + '/.v2mm/run', 'r')
+        source_file_opener = open(self.manager_data_directory + 'run', 'r')
         executable_content = source_file_opener.readlines()
         # Modifying the executable to inject our mod.
         new_content = ''
@@ -169,7 +176,7 @@ class InterfaceV2MM(object):
                 new_content += line
         source_file_opener.close()
         # 1° Creating the new file.
-        destination_file = os.path.expanduser("~") + '/.v2mm/mod_launcher'
+        destination_file = self.manager_data_directory + 'mod_launcher'
         destination_file_opener = open(destination_file, 'w')
         # 2° Copy the modified content.
         destination_file_opener.write(new_content)
@@ -230,7 +237,7 @@ class InterfaceV2MM(object):
         # We want to copy it somewhere. ~/v2mm/run might be a good place.
         # todo check if path_to_run_exe exists -> logs
         file_source = open(path_to_run_exe, 'r')
-        if not os.path.exists(home_directory + '/.v2mm/'):  # Creates the directory if it does not exist. todo -> logs
+        if not os.path.exists(self.manager_data_directory):  # Creates the directory if it does not exist. todo -> logs
             os.mkdir(home_directory + '/.v2mm/')
         file_destination = open(home_directory + '/.v2mm/run', 'w') # todo try and logs
         file_destination.write(file_source.read()) # todo try and logs
@@ -239,7 +246,7 @@ class InterfaceV2MM(object):
 
         # Update the mod listbox once the data are loaded.
         self.mod_list.delete(0, END)
-        for mod in self.get_list_of_mods(os.path.expanduser("~") + '/.v2mm/run'):
+        for mod in self.get_list_of_mods(self.manager_data_directory + 'run'):
             self.mod_list.insert(END, mod)
 
 
