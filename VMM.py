@@ -28,10 +28,10 @@ class InterfaceV2MM(object):
         # data shown in a table.
 
         #   LEFT SUB-FRAME
-        left_sub_frame = Notebook(main_frame)
+        self.left_sub_frame = Notebook(main_frame)
         # The left sub_frame is made up of two tabs. One for installation and one for usage.
-        tab_installation = Frame(left_sub_frame)
-        left_sub_frame.add(tab_installation, text='Installation')
+        tab_installation = Frame(self.left_sub_frame)
+        self.left_sub_frame.add(tab_installation, text='Installation')
 
         #       STEAM LAUNCHER
         steam_launch_label = Label(tab_installation, text="1° First, launch steam.")
@@ -79,21 +79,21 @@ class InterfaceV2MM(object):
             command=self.swap_executable)
         steam_launcher_button.grid(column=0, row=12, pady=(0, 0), sticky='W')
 
-        tab_usage = Frame(left_sub_frame)
-        left_sub_frame.add(tab_usage, text='Usage')
+        self.tab_usage = Frame(self.left_sub_frame)
+        self.left_sub_frame.add(self.tab_usage, text='Usage')
 
         # GAME FRAME
         #       LIST OF MODS FOUNT
-        mod_list_label = Label(tab_usage, text="Mods fount in your steam files.")
+        mod_list_label = Label(self.tab_usage, text="Mods fount in your steam files.")
         mod_list_label.grid(column=0, row=1, sticky='W')
-        self.mod_list = Listbox(tab_usage)
+        self.mod_list = Listbox(self.tab_usage)
         self.mod_list.grid(column=0, row=2, sticky='W')
         for mod in self.get_list_of_mods(self.manager_data_directory + 'run'):
             self.mod_list.insert(END, mod)
         #       LAUNCH MOD BUTTON
-        Button(tab_usage, text='Launch selected mod', command=self.launch_game_with_selected_mod).grid(column=1, row=2)
+        Button(self.tab_usage, text='Launch selected mod', command=self.launch_game_with_selected_mod).grid(column=1, row=2)
 
-        left_sub_frame.grid(row=1, column=0)
+        self.left_sub_frame.grid(row=1, column=0)
 
         #   RIGHT SUB-FRAME
         right_sub_frame = Frame(main_frame)
@@ -126,7 +126,7 @@ class InterfaceV2MM(object):
         Button(end_button_frame, text='Leave', command=self.root.quit).grid(row=0, column=0)
 
         if self.is_game_already_installed():
-            left_sub_frame.select(tab_usage)
+            self.left_sub_frame.select(self.tab_usage)
 
     def is_game_already_installed(self):
         """
@@ -166,7 +166,7 @@ class InterfaceV2MM(object):
         try:
             os.rename(game_folder + '/victoria2.exe', game_folder + '/_victoria2.exe')
             copyfile(game_folder + '/v2game.exe', game_folder + '/victoria2.exe')
-            # todo change the selected tab to "usage"
+            self.left_sub_frame.select(self.tab_usage)
         except Exception as e:
             self.add_new_logs(e.__str__())
 
