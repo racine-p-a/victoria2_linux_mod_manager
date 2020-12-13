@@ -13,6 +13,9 @@ def launch_victoria2():
 
 
 class InterfaceV2MM(object):
+    """
+    Creation and representation of the mod manager interface.
+    """
     def __init__(self):
         self.root = Tk()
         self.root.title('Victoria 2 Mod Manager (linux)')
@@ -194,29 +197,34 @@ class InterfaceV2MM(object):
         3° execute this new file within a sub-shell
         :return:
         """
-        # todo logs
         # Getting the original content.
-        source_file_opener = open(self.manager_data_directory + 'run', 'r')
-        executable_content = source_file_opener.readlines()
+        try:
+            source_file_opener = open(self.manager_data_directory + 'run', 'r')
+            executable_content = source_file_opener.readlines()
         # Modifying the executable to inject our mod.
-        new_content = ''
-        for line in executable_content:
-            if line.startswith('DEF_CMD'):
-                new_content += line[0:-2] + ' "-mod=mod/' + self.mod_list.get(ANCHOR) + '")' + "\n"
-            else:
-                new_content += line
-        source_file_opener.close()
-        # 1° Creating the new file.
-        destination_file = self.manager_data_directory + 'mod_launcher'
-        destination_file_opener = open(destination_file, 'w')
-        # 2° Copy the modified content.
-        destination_file_opener.write(new_content)
-        destination_file_opener.close()
-        # Remember to make the file executable
-        st = os.stat(destination_file)
-        os.chmod(destination_file, st.st_mode | stat.S_IEXEC)
-        # 3° Execute in a sub-shell
-        subprocess.run(destination_file + ' &', shell=True, check=True, executable='/bin/sh')
+            new_content = ''
+            for line in executable_content:
+                if line.startswith('DEF_CMD'):
+                    new_content += line[0:-2] + ' "-mod=mod/' + self.mod_list.get(ANCHOR) + '")' + "\n"
+                else:
+                    new_content += line
+            source_file_opener.close()
+            # 1° Creating the new file.
+            try:
+                destination_file = self.manager_data_directory + 'mod_launcher'
+                destination_file_opener = open(destination_file, 'w')
+            # 2° Copy the modified content.
+                destination_file_opener.write(new_content)
+                destination_file_opener.close()
+            # Remember to make the file executable
+                st = os.stat(destination_file)
+                os.chmod(destination_file, st.st_mode | stat.S_IEXEC)
+            # 3° Execute in a sub-shell
+                subprocess.run(destination_file + ' &', shell=True, check=True, executable='/bin/sh')
+            except Exception as e:
+                self.add_new_logs(e.__str__())
+        except Exception as e:
+            self.add_new_logs(e.__str__())
 
     def get_list_of_mods(self, runfile_location):
         mod_list = ['---']
