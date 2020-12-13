@@ -134,10 +134,11 @@ class InterfaceV2MM(object):
         present in the manager directory.
         :return:
         """
-        # todo put in logs if directory manager has been found
         if os.path.exists(self.manager_data_directory):
             if os.path.exists(self.manager_data_directory + 'mod_launcher'):
+                self.add_new_logs('Manager directory (' + self.manager_data_directory + ') already exists.')
                 return True
+        self.add_new_logs('Unable to find the default manager directory (' + self.manager_data_directory + ').')
         return False
 
     @staticmethod
