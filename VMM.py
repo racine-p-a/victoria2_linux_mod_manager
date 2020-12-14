@@ -13,10 +13,15 @@ def launch_victoria2():
 
 
 class InterfaceV2MM(object):
+    """
+    Creation and representation of the mod manager interface.
+    """
     def __init__(self):
         self.root = Tk()
         self.root.title('Victoria 2 Mod Manager (linux)')
         self.manager_data_directory = os.path.expanduser("~") + '/.v2mm/'
+
+        self.log_frame = Text(self.root, height=10, width=100)
 
         # The interface is made up of three main frames. One containing two sub-frames, one for logs and one for the
         # leave button.
@@ -28,10 +33,10 @@ class InterfaceV2MM(object):
         # data shown in a table.
 
         #   LEFT SUB-FRAME
-        left_sub_frame = Notebook(main_frame)
+        self.left_sub_frame = Notebook(main_frame)
         # The left sub_frame is made up of two tabs. One for installation and one for usage.
-        tab_installation = Frame(left_sub_frame)
-        left_sub_frame.add(tab_installation, text='Installation')
+        tab_installation = Frame(self.left_sub_frame)
+        self.left_sub_frame.add(tab_installation, text='Installation')
 
         #       STEAM LAUNCHER
         steam_launch_label = Label(tab_installation, text="1° First, launch steam.")
@@ -79,21 +84,21 @@ class InterfaceV2MM(object):
             command=self.swap_executable)
         steam_launcher_button.grid(column=0, row=12, pady=(0, 0), sticky='W')
 
-        tab_usage = Frame(left_sub_frame)
-        left_sub_frame.add(tab_usage, text='Usage')
+        self.tab_usage = Frame(self.left_sub_frame)
+        self.left_sub_frame.add(self.tab_usage, text='Usage')
 
         # GAME FRAME
         #       LIST OF MODS FOUNT
-        mod_list_label = Label(tab_usage, text="Mods fount in your steam files.")
+        mod_list_label = Label(self.tab_usage, text="Mods fount in your steam files.")
         mod_list_label.grid(column=0, row=1, sticky='W')
-        self.mod_list = Listbox(tab_usage)
+        self.mod_list = Listbox(self.tab_usage)
         self.mod_list.grid(column=0, row=2, sticky='W')
         for mod in self.get_list_of_mods(self.manager_data_directory + 'run'):
             self.mod_list.insert(END, mod)
         #       LAUNCH MOD BUTTON
-        Button(tab_usage, text='Launch selected mod', command=self.launch_game_with_selected_mod).grid(column=1, row=2)
+        Button(self.tab_usage, text='Launch selected mod', command=self.launch_game_with_selected_mod).grid(column=1, row=2)
 
-        left_sub_frame.grid(row=1, column=0)
+        self.left_sub_frame.grid(row=1, column=0)
 
         #   RIGHT SUB-FRAME
         right_sub_frame = Frame(main_frame)
@@ -118,7 +123,7 @@ class InterfaceV2MM(object):
         # LOGS FRAME
         self.log_frame = Text(self.root, height=10, width=100)
         self.log_frame.grid(row=2, column=0)
-        self.log_frame.insert(END, "Logs :")
+        self.log_frame.insert(END, "")
 
         # END BUTTON FRAME
         end_button_frame = Frame(self.root)
@@ -126,7 +131,7 @@ class InterfaceV2MM(object):
         Button(end_button_frame, text='Leave', command=self.root.quit).grid(row=0, column=0)
 
         if self.is_game_already_installed():
-            left_sub_frame.select(tab_usage)
+            self.left_sub_frame.select(self.tab_usage)
 
     def is_game_already_installed(self):
         """
@@ -134,10 +139,11 @@ class InterfaceV2MM(object):
         present in the manager directory.
         :return:
         """
-        # todo put in logs if directory manager has been found
         if os.path.exists(self.manager_data_directory):
             if os.path.exists(self.manager_data_directory + 'mod_launcher'):
+                self.add_new_logs('Manager directory (' + self.manager_data_directory + ') already exists.')
                 return True
+        self.add_new_logs('Unable to find the default manager directory (' + self.manager_data_directory + ').')
         return False
 
     @staticmethod
@@ -165,7 +171,7 @@ class InterfaceV2MM(object):
         try:
             os.rename(game_folder + '/victoria2.exe', game_folder + '/_victoria2.exe')
             copyfile(game_folder + '/v2game.exe', game_folder + '/victoria2.exe')
-            # todo change the selected tab to "usage"
+            self.left_sub_frame.select(self.tab_usage)
         except Exception as e:
             self.add_new_logs(e.__str__())
 
@@ -174,15 +180,10 @@ class InterfaceV2MM(object):
         Adding new logs means geting the current displayed logs and place the new logs on top of them (at the
         beginning).
         """
-        final_logs = "Logs :\n"
-        final_logs += new_logs.__str__() + "\n"
+        old_logs = self.log_frame.get("1.0", END)
+        self.log_frame.delete("1.0", END)
 
-        precedent_logs = self.log_frame.get('1.0', END)
-        log_lines = precedent_logs.split("\n")
-        for line in log_lines:
-            if line != 'Logs :' and line != '':
-                final_logs += line + "\n"
-        self.log_frame.delete('1.0', END)
+        final_logs = new_logs.__str__() + "\n" + old_logs
         self.log_frame.insert(END, final_logs)
 
     def launch_game_with_selected_mod(self):
@@ -193,46 +194,52 @@ class InterfaceV2MM(object):
         3° execute this new file within a sub-shell
         :return:
         """
-        # todo logs
         # Getting the original content.
-        source_file_opener = open(self.manager_data_directory + 'run', 'r')
-        executable_content = source_file_opener.readlines()
+        try:
+            source_file_opener = open(self.manager_data_directory + 'run', 'r')
+            executable_content = source_file_opener.readlines()
         # Modifying the executable to inject our mod.
-        new_content = ''
-        for line in executable_content:
-            if line.startswith('DEF_CMD'):
-                new_content += line[0:-2] + ' "-mod=mod/' + self.mod_list.get(ANCHOR) + '")' + "\n"
-            else:
-                new_content += line
-        source_file_opener.close()
-        # 1° Creating the new file.
-        destination_file = self.manager_data_directory + 'mod_launcher'
-        destination_file_opener = open(destination_file, 'w')
-        # 2° Copy the modified content.
-        destination_file_opener.write(new_content)
-        destination_file_opener.close()
-        # Remember to make the file executable
-        st = os.stat(destination_file)
-        os.chmod(destination_file, st.st_mode | stat.S_IEXEC)
-        # 3° Execute in a sub-shell
-        subprocess.run(destination_file + ' &', shell=True, check=True, executable='/bin/sh')
+            new_content = ''
+            for line in executable_content:
+                if line.startswith('DEF_CMD'):
+                    new_content += line[0:-2] + ' "-mod=mod/' + self.mod_list.get(ANCHOR) + '")' + "\n"
+                else:
+                    new_content += line
+            source_file_opener.close()
+            # 1° Creating the new file.
+            try:
+                destination_file = self.manager_data_directory + 'mod_launcher'
+                destination_file_opener = open(destination_file, 'w')
+            # 2° Copy the modified content.
+                destination_file_opener.write(new_content)
+                destination_file_opener.close()
+            # Remember to make the file executable
+                st = os.stat(destination_file)
+                os.chmod(destination_file, st.st_mode | stat.S_IEXEC)
+            # 3° Execute in a sub-shell
+                subprocess.run(destination_file + ' &', shell=True, check=True, executable='/bin/sh')
+            except Exception as e:
+                self.add_new_logs(e.__str__())
+        except Exception as e:
+            self.add_new_logs(e.__str__())
 
     def get_list_of_mods(self, runfile_location):
         mod_list = ['---']
         # We need to extract the game directory which is within the file. It is the line starting by « cd " ».
-        game_directory = self.extract_game_directory_from_proton_runfile(runfile_location) # todo checks and logs
+        game_directory = self.extract_game_directory_from_proton_runfile(runfile_location)
         if not game_directory:  # If failure to load mods, send back empty list.
+            self.add_new_logs('No mods fount.')
             return mod_list
 
         for item in os.listdir(game_directory + "/mod/"):
             if os.path.isfile(game_directory + "/mod/" + item):  # Is it a file ?
                 # And is its extension « .mod » ?
                 if item.endswith('.mod'):
+                    self.add_new_logs('Mod in directory : ' + item)
                     mod_list.append(item)
         return mod_list
 
-    @staticmethod
-    def extract_game_directory_from_proton_runfile(runfile_location):
+    def extract_game_directory_from_proton_runfile(self, runfile_location):
         """
         Extracts the game main directory using the data from the run file generated by PROTON.
         :param runfile_location: The location of the run file generated by PROTON.
@@ -245,7 +252,7 @@ class InterfaceV2MM(object):
                 if line.startswith('cd "'):
                     return line[4:-2]
         except FileNotFoundError:
-            # todo logs
+            self.add_new_logs('File not found : ' + runfile_location)
             return False
         return False
 
@@ -259,21 +266,23 @@ class InterfaceV2MM(object):
         # The common location is /tmp/proton_UNIX-USERNAME .
         # One log file is enough for the mod manager : /tmp/proton_UNIX-USERNAME/run
 
-        # todo MOAAAAAAAAAR LOGS !
         # Get the file location
         home_directory = os.path.expanduser("~")
         username = os.path.basename(home_directory)
         # So, the file we want is...
         path_to_run_exe = '/tmp/proton_' + username + '/run'
         # We want to copy it somewhere. ~/v2mm/run might be a good place.
-        # todo check if path_to_run_exe exists -> logs
-        file_source = open(path_to_run_exe, 'r')
-        if not os.path.exists(self.manager_data_directory):  # Creates the directory if it does not exist. todo -> logs
-            os.mkdir(home_directory + '/.v2mm/')
-        file_destination = open(home_directory + '/.v2mm/run', 'w') # todo try and logs
-        file_destination.write(file_source.read()) # todo try and logs
-        file_source.close()
-        file_destination.close()
+        try:
+            file_source = open(path_to_run_exe, 'r')
+            if not os.path.exists(self.manager_data_directory):  # Creates the directory if it does not exist.
+                os.mkdir(home_directory + '/.v2mm/')
+                self.add_new_logs('Creation of a new directory for the manager : ' + home_directory + '/.v2mm/')
+            file_destination = open(home_directory + '/.v2mm/run', 'w')
+            file_destination.write(file_source.read())
+            file_source.close()
+            file_destination.close()
+        except Exception as e:
+            self.add_new_logs(e.__str__())
 
         # Update the mod listbox once the data are loaded.
         self.mod_list.delete(0, END)
