@@ -42,11 +42,5 @@ Extract and place the files in the mod directory of your game (should look like 
 
 ## TODOs
 
-Make the interface less ugly.
-Make it more error resilient.
-
-Make it configurable.
-- where to store the run file
-
-Place logs in interface
-- failure to find the proton run file and/or directory
+- Make the interface less ugly. 
+- The logs do not work.
