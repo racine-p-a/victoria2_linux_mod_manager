@@ -1,17 +1,17 @@
 # victoria2_linux_mod_manager
 
-Current version `0.1`.
+Current version `0.2`. I do not plan to enhance this mod manager now except for bug correction or new great ideas to
+implement. Your issues/bug reports are welcome. 
 
 Works only for the steam version (using steam PROTON). It is only a simple file that I would like to keep
 as light and simple as possible.
 
-Issues/bug reports are welcome.
 
 ## Installation
 
 Just download/clone the python file and place it on your computer wherever you want and then launch it.
 
-```python
+```bash
 python3 VMM.py
 ```
 
@@ -24,7 +24,7 @@ Now, just follow the steps explained in the upper half of the (ugly) interface.
 - one you are on the game main menu, quit the game.
 - click on ___Save your data___ in the mod manager interface, this should detect all the mods you already have
 installed.
- 
+- you might need to swap executables of your game if you did not swap them in the past. 
 
 
 ## Usage
@@ -42,11 +42,5 @@ Extract and place the files in the mod directory of your game (should look like 
 
 ## TODOs
 
-Make the interface less ugly.
-Make it more error resilient.
-
-Make it configurable.
-- where to store the run file
-
-Place logs in interface
-- failure to find the proton run file and/or directory
+- Make the interface less ugly. 
+- The logs do not work.
