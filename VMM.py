@@ -1,5 +1,6 @@
 # -*- coding:Utf-8 -*-
 
+import sys
 import subprocess
 from tkinter import *
 from tkinter.ttk import *
